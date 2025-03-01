@@ -25,7 +25,7 @@ X_test_vec = vectorizer.transform(X_test)
 
 # Treinar o modelo
 print("Treinando o modelo...")
-model = LogisticRegression(max_iter=1000)  # Aumentei max_iter para garantir convergência
+model = LogisticRegression(max_iter=1000)
 model.fit(X_train_vec, y_train)
 
 # Avaliar o modelo
@@ -39,10 +39,24 @@ def predict_sentiment(text):
     prediction = model.predict(text_vec)[0]
     return "Positivo" if prediction == 1 else "Negativo"
 
-# Automação: coletar dados fictícios (substitua por web scraping depois)
-comments = ["Great product!", "Terrible service.", "It's okay."]
+# Automação: coletar comentários do Reddit
+print("Coletando comentários do Reddit...")
+url = "https://www.reddit.com/r/technology/comments/1d8l5x8/new_tech_breakthrough/"  # Substitua por um post real
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Extrair comentários (ajuste o seletor conforme o HTML do Reddit)
+comments = [c.text.strip() for c in soup.find_all('p', class_='_1qeIAgB0cPwnLhDF9XSiJM')]
+
+# Fallback para dados fictícios se não encontrar comentários
+if not comments or len(comments) < 1:
+    print("Nenhum comentário encontrado, usando dados fictícios...")
+    comments = ["Great product!", "Terrible service.", "It's okay."]
+
+# Analisar sentimentos e gerar relatório
 results = []
-for comment in comments:
+for comment in comments[:10]:  # Limite a 10 comentários para não sobrecarregar
     sentiment = predict_sentiment(comment)
     results.append({"Comentário": comment, "Sentimento": sentiment})
 
